@@ -1,9 +1,9 @@
 {
-  "name": "dsh-harness-vscode",
-  "displayName": "DeepSeek Harness for VS Code",
+  "name": "better-dsh-sidebar",
+  "displayName": "better-dsh-sidebar",
   "description": "Launch and embed the DeepSeek Harness Web UI in a VS Code panel. Optionally installs the dsh-mobile-nav narrow-screen layout so a small panel adapts like a phone.",
-  "version": "0.1.0",
-  "publisher": "dsh-external",
+  "version": "0.1.1",
+  "publisher": "kkwang",
   "icon": "media/icon.png",
   "license": "MIT",
   "engines": {
@@ -21,7 +21,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/deepseek-ai/deepseek-harness"
+    "url": "https://github.com/nickzone/deepseek-harness-vscode"
   },
   "activationEvents": [
     "onStartupFinished",
@@ -37,7 +37,7 @@
       "activitybar": [
         {
           "id": "dshharness",
-          "title": "DeepSeek Harness",
+          "title": "DSH",
           "icon": "media/icon.svg"
         }
       ]
@@ -47,7 +47,7 @@
         {
           "type": "webview",
           "id": "dshharness.panel",
-          "name": "DeepSeek Harness"
+          "name": "DSH"
         }
       ]
     },

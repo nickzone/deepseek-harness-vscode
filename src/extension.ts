@@ -19,8 +19,26 @@ let provider: HarnessViewProvider | undefined
 /** The dsh-mobile-nav copy bundled inside this extension. */
 let bundledNavPath = ''
 
+/** Profiles offered in the sidebar toolbar dropdown. */
+const SIDEBAR_PROFILES = ['web', 'web-vscode']
+
 function log(message: string): void {
   output?.appendLine(message)
+}
+
+/**
+ * True when the extension owns/boosts this profile (boots it, provisions base
+ * bundles, installs dsh-mobile-nav). The personal `web` profile is never
+ * touched — when selected it is booted as-is, without provisioning.
+ */
+function isManagedProfile(profile: string): boolean {
+  return profile !== 'web'
+}
+
+/** Profiles shown in the dropdown, always including the configured one. */
+function sidebarProfiles(): string[] {
+  const current = readSettings().profile
+  return SIDEBAR_PROFILES.includes(current) ? SIDEBAR_PROFILES : [...SIDEBAR_PROFILES, current]
 }
 
 async function ensureServer(): Promise<number> {
@@ -30,11 +48,14 @@ async function ensureServer(): Promise<number> {
   const settings = readSettings()
   // The extension boots an independent, dedicated profile (not the user's
   // personal `web` profile) so the embedded instance only has the harness
-  // bundles plus the narrow-screen plugin — nothing else.
-  ensureProfile(settings.profile)
-  // Narrow-screen source: the user's own checkout wins, otherwise the copy
-  // bundled in this extension (extension-relative, portable across machines).
-  await ensureMobileNav(settings.dshBin, settings.profile, settings.mobileNavPath || bundledNavPath)
+  // bundles plus the narrow-screen plugin — nothing else. The personal `web`
+  // profile is booted as-is and never provisioned.
+  if (isManagedProfile(settings.profile)) {
+    ensureProfile(settings.profile)
+    // Narrow-screen source: the user's own checkout wins, otherwise the copy
+    // bundled in this extension (extension-relative, portable across machines).
+    await ensureMobileNav(settings.dshBin, settings.profile, settings.mobileNavPath || bundledNavPath)
+  }
   server = await startDshServer(
     {
       dshBin: settings.dshBin,
@@ -56,6 +77,47 @@ async function harnessUrl(): Promise<string> {
   const settings = readSettings()
   const port = await ensureServer()
   return `http://${settings.host}:${port}/`
+}
+
+/**
+ * Stop the running dsh server (if any) and boot it again, returning the new
+ * URL. Used by the toolbar's restart action; the port can change when
+ * `dshharness.port` is 0.
+ */
+async function restartServer(): Promise<string> {
+  const settings = readSettings()
+  if (server) {
+    const current = server
+    server = undefined
+    await current.stop()
+  }
+  const port = await ensureServer()
+  log(`dsh web restarted at http://${settings.host}:${port}/`)
+  return `http://${settings.host}:${port}/`
+}
+
+/** Open a URL in the system's default browser. */
+async function openExternal(url: string): Promise<void> {
+  try {
+    await vscode.env.openExternal(vscode.Uri.parse(url))
+  } catch (error) {
+    notifyError(error)
+  }
+}
+
+/**
+ * Switch the sidebar to another dsh profile: persist the setting, then reboot
+ * the server so the new profile is loaded. Returns the new URL.
+ */
+async function switchProfile(profile: string): Promise<string> {
+  const settings = readSettings()
+  if (settings.profile === profile) {
+    return harnessUrl()
+  }
+  const config = vscode.workspace.getConfiguration('dshharness')
+  await config.update('profile', profile, vscode.ConfigurationTarget.Global)
+  log(`switching sidebar profile to "${profile}"`)
+  return restartServer()
 }
 
 async function revealSidebar(): Promise<void> {
@@ -84,7 +146,16 @@ export function activate(context: vscode.ExtensionContext): void {
 
   bundledNavPath = path.join(context.extensionUri.fsPath, 'deps', 'dsh-mobile-nav')
 
-  provider = new HarnessViewProvider(() => harnessUrl())
+  provider = new HarnessViewProvider(
+    () => harnessUrl(),
+    {
+      restart: () => restartServer(),
+      openExternal: (url) => void openExternal(url),
+      switchProfile: (profile) => switchProfile(profile),
+      getProfile: () => readSettings().profile,
+      getProfiles: () => sidebarProfiles(),
+    },
+  )
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(HarnessViewProvider.viewType, provider),
   )

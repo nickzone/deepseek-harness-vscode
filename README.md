@@ -1,9 +1,9 @@
-# dsh-harness-vscode
+# better-dsh-sidebar
 
-Launch and run the **DeepSeek Harness** Web UI inside VS Code as an **independent
-instance**. On activation the extension boots a dedicated profile (`web-vscode` by
-default — never your personal `web` profile), waits for the server, and shows the UI
-in a **sidebar webview** (activity-bar view container). A "Open in Simple Browser"
+Run **DeepSeek Harness** in VS Code with an **independent profile** and a UI
+purpose-built for the sidebar. On activation the extension boots a dedicated profile
+(`web-vscode` by default — never your personal `web` profile), waits for the server,
+and shows the UI in a **sidebar webview** (activity-bar view container). An "Open in Simple Browser"
 command is also available. When the view is narrower than 1024px, the
 `dsh-mobile-nav` narrow-screen support makes it adapt like a phone (overlay drawer,
 full-width conversation, mobile settings, etc.) — reusing the layout work from the
@@ -52,6 +52,20 @@ is a thin VS Code wrapper around it:
   the drawer, and the backdrop tap or Escape closes it. At ≥ 1024px every rule
   and control is media-gated off, so desktop is unchanged.
 
+## Sidebar toolbar
+
+The sidebar view has a slim toolbar above the embedded UI:
+
+- **Server address** — shows the running server (`ip:port`). Click it to open
+  the UI in your system's default browser.
+- **Profile dropdown** — switches the sidebar between dsh profiles on the fly
+  (e.g. the dedicated `web-vscode` and your personal `web`). The choice is
+  persisted in the `dshharness.profile` setting and switching reboots the
+  server. Selecting your personal `web` profile boots it as-is — the extension
+  never provisions or modifies it.
+- **Restart (⟳)** — stops the dsh server and boots it again, then reloads the
+  UI (the port may change when `dshharness.port` is `0`).
+
 ## Requirements
 
 - `dsh` CLI (>= 0.1.0-rc.7) on `PATH` (or configure `dshharness.dshBin`).
@@ -93,7 +107,7 @@ their prepare build.
 | Setting | Default | Meaning |
 | --- | --- | --- |
 | `dshharness.dshBin` | `dsh` | Path or command name of the dsh CLI. |
-| `dshharness.profile` | `web-vscode` | The independent dsh profile to boot and provision. |
+| `dshharness.profile` | `web-vscode` | The dsh profile to boot (and provision, unless it is your personal `web`). Switch it from the sidebar toolbar. |
 | `dshharness.host` | `127.0.0.1` | Loopback host the server binds to. |
 | `dshharness.port` | `0` | Server port; `0` picks a free port, a positive value is used verbatim. |
 | `dshharness.mobileNavPath` | *(empty)* | Optional absolute path to your own `dsh-mobile-nav` checkout. Leave empty to use the copy bundled with this extension. |
@@ -117,7 +131,7 @@ Run with the Extension Development Host (F5) after `npm run compile`.
 ## Packaging
 
 ```sh
-npm run package   # produces dsh-harness-vscode-*.vsix via vsce
+npm run package   # produces better-dsh-sidebar-*.vsix via vsce
 ```
 
 ## License
