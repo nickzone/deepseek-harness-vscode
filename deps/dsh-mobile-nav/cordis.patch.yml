@@ -1,0 +1,4 @@
+# dsh-mobile-nav minimal bundle: one client-only plugin row.
+- insert:
+    - id: dsh-mobile-nav
+      name: '@dsh-external/dsh-mobile-nav'

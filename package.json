@@ -1,0 +1,130 @@
+{
+  "name": "dsh-harness-vscode",
+  "displayName": "DeepSeek Harness for VS Code",
+  "description": "Launch and embed the DeepSeek Harness Web UI in a VS Code panel. Optionally installs the dsh-mobile-nav narrow-screen layout so a small panel adapts like a phone.",
+  "version": "0.1.0",
+  "publisher": "dsh-external",
+  "icon": "media/icon.png",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "deepseek",
+    "harness",
+    "dsh",
+    "agent",
+    "webview"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deepseek-ai/deepseek-harness"
+  },
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:dshharness.open",
+    "onCommand:dshharness.openInSimpleBrowser",
+    "onCommand:dshharness.installMobileNav",
+    "onCommand:dshharness.installPlugin",
+    "onCommand:dshharness.stopServer"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dshharness",
+          "title": "DeepSeek Harness",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "dshharness": [
+        {
+          "type": "webview",
+          "id": "dshharness.panel",
+          "name": "DeepSeek Harness"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "dshharness.open",
+        "title": "Open Panel",
+        "category": "DeepSeek Harness"
+      },
+      {
+        "command": "dshharness.openInSimpleBrowser",
+        "title": "Open in Simple Browser",
+        "category": "DeepSeek Harness"
+      },
+      {
+        "command": "dshharness.installMobileNav",
+        "title": "Install Narrow-Screen Support (dsh-mobile-nav)",
+        "category": "DeepSeek Harness"
+      },
+      {
+        "command": "dshharness.installPlugin",
+        "title": "Install Plugin into Sidebar Profile",
+        "category": "DeepSeek Harness"
+      },
+      {
+        "command": "dshharness.stopServer",
+        "title": "Stop Server",
+        "category": "DeepSeek Harness"
+      }
+    ],
+    "configuration": {
+      "title": "DeepSeek Harness",
+      "properties": {
+        "dshharness.dshBin": {
+          "type": "string",
+          "default": "dsh",
+          "description": "Path or command name of the dsh CLI binary used to boot the Web profile."
+        },
+        "dshharness.host": {
+          "type": "string",
+          "default": "127.0.0.1",
+          "description": "Loopback host the dsh web server binds to. Only loopback hosts are supported."
+        },
+        "dshharness.port": {
+          "type": "number",
+          "default": 0,
+          "description": "Port for the dsh web server. 0 lets the extension pick a free port; a positive value is used verbatim."
+        },
+        "dshharness.profile": {
+          "type": "string",
+          "default": "web-vscode",
+          "description": "Independent dsh profile the extension boots. The extension provisions it with only the base web bundles plus the narrow-screen plugin — it never copies your personal web-profile plugins."
+        },
+        "dshharness.mobileNavPath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional absolute path to your own dsh-mobile-nav checkout. Leave empty to use the copy bundled with this extension (portable across machines). The narrow-screen layout is installed into the dedicated profile automatically."
+        },
+        "dshharness.openOnStart": {
+          "type": "boolean",
+          "default": true,
+          "description": "Reopen a previously-open panel automatically when VS Code starts."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "build:core": "node scripts/build-minimal-core.mjs",
+    "vscode:prepublish": "npm run compile && npm run build:core",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.9.2",
+    "typescript": "^5.5.4"
+  }
+}
