@@ -31,11 +31,15 @@ export function makeSidebarHtml(
   url: string,
   profile: string,
   profiles: string[],
+  error?: string,
 ): string {
   const nonce = crypto.randomBytes(16).toString('base64')
   // Show the server address (e.g. 127.0.0.1:54321) in the toolbar. Escape it
   // since `host` is user-configurable and lands in both text and an attribute.
-  const address = url.replace(/^https?:\/\//, '').replace(/\/+$/, '')
+  const address = url ? url.replace(/^https?:\/\//, '').replace(/\/+$/, '') : ''
+  const body = error
+    ? `<div id="error">${esc(error)}</div>`
+    : `<iframe id="frame" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads"></iframe>`
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,17 +82,23 @@ export function makeSidebarHtml(
   #restart:active { background: var(--vscode-toolbar-activeBackground); }
   #restart:disabled { opacity: .5; cursor: default; }
   #frame { display: block; width: 100%; height: calc(100% - 30px); border: 0; }
+  #error {
+    height: calc(100% - 30px); overflow: auto; padding: 12px; box-sizing: border-box;
+    font-family: var(--vscode-font-family); font-size: 12px; line-height: 1.5;
+    color: var(--vscode-errorForeground, #f14c4c);
+    white-space: pre-wrap; word-break: break-word;
+  }
 </style>
 </head>
 <body>
 <div id="toolbar">
-  <span id="address" title="Open in browser: ${esc(address)}">${esc(address)} <span class="ext">↗</span></span>
+  <span id="address" title="Open in browser: ${esc(address)}">${esc(address)}${address ? ' <span class="ext">↗</span>' : ''}</span>
   <select id="profile" title="Sidebar profile">
     ${profiles.map((p) => `<option value="${esc(p)}"${p === profile ? ' selected' : ''}>${esc(p)}</option>`).join('')}
   </select>
   <button id="restart" title="Restart server" aria-label="Restart server">⟳</button>
 </div>
-<iframe id="frame" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads"></iframe>
+${body}
 <script nonce="${nonce}">
   const vscode = acquireVsCodeApi();
   const url = ${JSON.stringify(url)};
@@ -97,12 +107,13 @@ export function makeSidebarHtml(
     vscode.postMessage({ type: 'restart' });
   });
   document.getElementById('address').addEventListener('click', function () {
-    vscode.postMessage({ type: 'openExternal', url: url });
+    if (url) { vscode.postMessage({ type: 'openExternal', url: url }); }
   });
   document.getElementById('profile').addEventListener('change', function () {
     vscode.postMessage({ type: 'switchProfile', profile: this.value });
   });
-  document.getElementById('frame').src = url;
+  const frame = document.getElementById('frame');
+  if (frame) { frame.src = url; }
 </script>
 </body>
 </html>`
@@ -168,7 +179,13 @@ export class HarnessViewProvider implements vscode.WebviewViewProvider {
 
   private showError(view: vscode.WebviewView, error: unknown): void {
     const message = error instanceof Error ? error.message : String(error)
-    view.webview.html = `<!DOCTYPE html><html><body style="font-family: sans-serif; padding: 12px;">Unable to start DeepSeek Harness: ${message}</body></html>`
+    view.webview.html = makeSidebarHtml(
+      view.webview,
+      this._url ?? '',
+      this._handlers.getProfile(),
+      this._handlers.getProfiles(),
+      `Unable to start DeepSeek Harness:\n${message}`,
+    )
   }
 
   /**
