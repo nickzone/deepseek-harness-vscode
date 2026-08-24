@@ -2,6 +2,11 @@
 
 在 VS Code 侧边栏中通过**独立 profile** 运行 **DeepSeek Harness**，并使用专门为侧边栏适配的 UI。无需打开浏览器、切换窗口；插件自动管理 dsh 服务进程、嵌入界面和窄屏布局，并提供一键在浏览器打开、切换 profile、重启服务等常用操作。
 
+<p align="center">
+  <img src="media/screenshots/sidebar-home.jpg" alt="DeepSeek Harness 侧边栏首页" width="360">
+  <img src="media/screenshots/sidebar-settings.jpg" alt="DeepSeek Harness 侧边栏设置页" width="360">
+</p>
+
 ## 功能特性
 
 ### 侧边栏内嵌运行

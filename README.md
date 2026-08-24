@@ -9,6 +9,11 @@ command is also available. When the view is narrower than 1024px, the
 full-width conversation, mobile settings, etc.) — reusing the layout work from the
 [`dsh-web-mobile`](https://github.com/mexiaosqwq/dsh-web-mobile) project.
 
+<p align="center">
+  <img src="media/screenshots/sidebar-home.jpg" alt="DeepSeek Harness sidebar home" width="360">
+  <img src="media/screenshots/sidebar-settings.jpg" alt="DeepSeek Harness sidebar settings" width="360">
+</p>
+
 ## Why this exists
 
 The DeepSeek Harness browser UI is a normal web app served over HTTP. This extension

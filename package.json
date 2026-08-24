@@ -2,7 +2,7 @@
   "name": "better-dsh-sidebar",
   "displayName": "better-dsh-sidebar",
   "description": "Launch and embed the DeepSeek Harness Web UI in a VS Code panel. Optionally installs the dsh-mobile-nav narrow-screen layout so a small panel adapts like a phone.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "kkwang",
   "icon": "media/icon.png",
   "license": "MIT",
